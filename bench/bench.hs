@@ -30,11 +30,16 @@ instance Show Expr where
     x :+: y -> Binary (Operator L 3 " + ") x y
     x :*: y -> Binary (Operator L 4 " * ") x y)
 
+eval :: Expr -> Integer
+eval (Numb n) = n
+eval (x :+: y) = eval x + eval y
+eval (x :*: y) = eval x * eval y
+
 longExprL, longExprR :: Expr
-longExprL = foldl1 (:+:) (map Numb [1..1000])
-longExprR = foldr1 (:+:) (map Numb [1..1000])
+longExprL = let e = foldl1 (:+:) (map Numb [1..100000]) in eval e `seq` e
+longExprR = let e = foldr1 (:+:) (map Numb [1..100000]) in eval e `seq` e
 
 main :: IO ()
 main = defaultMain
-  [ bgroup "bench"  [ bench "left"  $ whnf (length . show) longExprL
-                    , bench "right" $ whnf (length . show) longExprR ] ]
+    [ bgroup "bench"  [ bench "left"  $ whnf (length . show) longExprL
+                      , bench "right" $ whnf (length . show) longExprR ] ]
