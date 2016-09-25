@@ -35,7 +35,8 @@ data Operator t = Operator
   , _representation :: t }
 
 -- | A function for properly printing an expression tree
--- with minimal parentheses.
+-- with minimal parentheses. Algorithm is adapted from
+-- <http://www.cs.tufts.edu/%7Enr/pubs/unparse-abstract.html here>.
 --
 -- >>> :{
 -- data Expr = Number Integer
@@ -94,6 +95,30 @@ data Operator t = Operator
 --
 -- >>> 1 :^: 2 :^: 3
 -- 1 ^ 2 ^ 3
+--
+-- >>> data BoolExpr = T | F | And BoolExpr BoolExpr | Or BoolExpr BoolExpr | Not BoolExpr
+--
+-- >>> :{
+-- instance Show BoolExpr where
+--   showsPrec _ = runDiffStr . showExpr (\s -> "(" <> s <> ")") proj where
+--     proj T = Lit "1"
+--     proj F = Lit "0"
+--     proj (And x y) = Binary (Operator L 3 " && ") x y
+--     proj (Or  x y) = Binary (Operator L 2 " || ") x y
+--     proj (Not x)   = Unary  (Operator L 4 "!") x
+-- :}
+--
+-- >>> Not T
+-- !1
+--
+-- >>> And T T
+-- 1 && 1
+--
+-- >>> And T (Or F F)
+-- 1 && (0 || 0)
+--
+-- >>> Not (Or T F)
+-- !(1 || 0)
 
 showExpr :: Monoid t
          => (t -> t) -- ^ This argument should be a function which parenthesizes its input.
