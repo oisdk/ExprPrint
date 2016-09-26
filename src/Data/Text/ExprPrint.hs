@@ -132,7 +132,7 @@ showExpr prns proj = rec . proj where
     | ip < op || ip == op && (ia /= oa || oa /= sid) = prns
   ifPrns _ _ _ _ = id
   prec = \case
-    Lit _                       -> Nothing
+    Lit _                        -> Nothing
     Prefix  (Operator s r _) _   -> Just (s,r)
     Postfix (Operator s r _) _   -> Just (s,r)
     Binary  (Operator s r _) _ _ -> Just (s,r)
