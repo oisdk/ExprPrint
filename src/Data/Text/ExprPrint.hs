@@ -111,6 +111,9 @@ data Operator t = Operator
 -- >>> And T (Or F F)
 -- 1 && (0 || 0)
 --
+-- >>> Or T (And F F)
+-- 1 || 0 && 0
+--
 -- >>> Not (Or T F)
 -- !(1 || 0)
 --
