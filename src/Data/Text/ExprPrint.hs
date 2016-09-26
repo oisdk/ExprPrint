@@ -45,9 +45,6 @@ data Operator t = Operator
 --           | Expr :+: Expr
 --           | Expr :*: Expr
 --           | Expr :^: Expr
--- infixr 8 :^:
--- infixl 6 :+:
--- infixl 7 :*:
 -- :}
 --
 -- >>> :{
@@ -87,7 +84,7 @@ data Operator t = Operator
 -- >>> (1 :^: 2) :^: 3
 -- (1 ^ 2) ^ 3
 --
--- >>> 1 :^: 2 :^: 3
+-- >>> 1 :^: (2 :^: 3)
 -- 1 ^ 2 ^ 3
 --
 -- >>> data BoolExpr = T | F | And BoolExpr BoolExpr | Or BoolExpr BoolExpr | Not BoolExpr
