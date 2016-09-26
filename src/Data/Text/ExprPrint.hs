@@ -112,6 +112,9 @@ data Operator t = Operator
 --
 -- >>> Not (Or T F)
 -- !(1 || 0)
+--
+-- >>> Not (Not F)
+-- !(!0)
 
 showExpr :: Monoid t
          => (t -> t) -- ^ This argument should be a function which parenthesizes its input.
