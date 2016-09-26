@@ -124,10 +124,10 @@ showExpr :: Monoid t
 showExpr prns proj = rec . proj where
   rec = showAlg . fmap ((prec &&& rec) . proj)
   showAlg = \case
-    Lit t                               ->                     t
-    Prefix  (Operator s r t) (p,x)      ->                     t <> ifPrns R s r p x
-    Postfix (Operator s r t) (p,x)      -> ifPrns L s r p x <> t
-    Binary (Operator s r t) (p,x) (q,y) -> ifPrns L s r p x <> t <> ifPrns R s r q y
+    Lit t                                ->                     t
+    Prefix  (Operator s r t)       (q,y) ->                     t <> ifPrns R s r q y
+    Postfix (Operator s r t) (p,x)       -> ifPrns L s r p x <> t
+    Binary  (Operator s r t) (p,x) (q,y) -> ifPrns L s r p x <> t <> ifPrns R s r q y
   ifPrns sid oa op (Just (ia,ip))
     | ip < op || ip == op && (ia /= oa || oa /= sid) = prns
   ifPrns _ _ _ _ = id
