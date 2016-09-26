@@ -58,24 +58,16 @@ data Operator t = Operator
 --   negate = undefined
 -- :}
 --
--- >>> :set -XOverloadedStrings
--- >>> import Data.String
 -- >>> import Data.Monoid
--- >>> :{
--- newtype DiffStr = DiffStr { runDiffStr :: ShowS }
--- instance Monoid DiffStr where
---   mempty = DiffStr id
---   DiffStr x `mappend` DiffStr y = DiffStr (x . y)
--- instance IsString DiffStr where fromString = DiffStr . showString
--- :}
 --
 -- >>> :{
 -- instance Show Expr where
---   showsPrec _ = runDiffStr . showExpr (\s -> "(" <> s <> ")") proj where
---     proj (Number n) = Lit (DiffStr (shows n))
---     proj (x :+: y) = Binary (Operator L 3 " + ") x y
---     proj (x :*: y) = Binary (Operator L 4 " * ") x y
---     proj (x :^: y) = Binary (Operator R 5 " ^ ") x y
+--   showsPrec _ = appEndo . showExpr (\s -> toEnd "(" <> s <> toEnd ")") proj where
+--     proj (Number n) = Lit (Endo (shows n))
+--     proj (x :+: y) = Binary (Operator L 3 (toEnd " + ")) x y
+--     proj (x :*: y) = Binary (Operator L 4 (toEnd " * ")) x y
+--     proj (x :^: y) = Binary (Operator R 5 (toEnd " ^ ")) x y
+--     toEnd = Endo . showString
 -- :}
 --
 -- >>> (1 + 2 + 3) :: Expr
@@ -100,12 +92,13 @@ data Operator t = Operator
 --
 -- >>> :{
 -- instance Show BoolExpr where
---   showsPrec _ = runDiffStr . showExpr (\s -> "(" <> s <> ")") proj where
---     proj T = Lit "1"
---     proj F = Lit "0"
---     proj (And x y) = Binary (Operator L 3 " && ") x y
---     proj (Or  x y) = Binary (Operator L 2 " || ") x y
---     proj (Not x)   = Unary  (Operator L 4 "!") x
+--   showsPrec _ = appEndo . showExpr (\s -> toEnd "(" <> s <> toEnd ")") proj where
+--     proj T = Lit (toEnd "1")
+--     proj F = Lit (toEnd "0")
+--     proj (And x y) = Binary (Operator L 3 (toEnd " && ")) x y
+--     proj (Or  x y) = Binary (Operator L 2 (toEnd " || ")) x y
+--     proj (Not x)   = Unary  (Operator L 4 (toEnd "!"   )) x
+--     toEnd = Endo . showString
 -- :}
 --
 -- >>> Not T
