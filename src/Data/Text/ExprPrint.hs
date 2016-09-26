@@ -19,11 +19,13 @@ data Side = L | R deriving Eq
 data ShowExpr t e
   -- | An expression with no children. The argument is the expression's textual representation.
   = Lit t
-  -- | An expression with one child.
-  | Unary  (Operator t) e
+  -- | A prefix expression with one child.
+  | Prefix  (Operator t) e
+  -- | A postfix expression with one child.
+  | Postfix (Operator t) e
   -- | An expression with two children.
   | Binary (Operator t) e e
-  deriving Functor
+  deriving  Functor
 
 -- | This datatype represents the necessary information for pretty-printing an operator
 data Operator t = Operator
@@ -92,13 +94,12 @@ data Operator t = Operator
 --
 -- >>> :{
 -- instance Show BoolExpr where
---   showsPrec _ = appEndo . showExpr (\s -> toEnd "(" <> s <> toEnd ")") proj where
---     proj T = Lit (toEnd "1")
---     proj F = Lit (toEnd "0")
---     proj (And x y) = Binary (Operator L 3 (toEnd " && ")) x y
---     proj (Or  x y) = Binary (Operator L 2 (toEnd " || ")) x y
---     proj (Not x)   = Unary  (Operator L 4 (toEnd "!"   )) x
---     toEnd = Endo . showString
+--   show = showExpr (\s -> "(" ++ s ++ ")") proj where
+--     proj T = Lit "1"
+--     proj F = Lit "0"
+--     proj (And x y) = Binary (Operator L 3 " && ") x y
+--     proj (Or  x y) = Binary (Operator L 2 " || ") x y
+--     proj (Not x)   = Prefix (Operator L 4 "!"   ) x
 -- :}
 --
 -- >>> Not T
@@ -123,14 +124,16 @@ showExpr :: Monoid t
 showExpr prns proj = rec . proj where
   rec = showAlg . fmap ((prec &&& rec) . proj)
   showAlg = \case
-    Lit t                               -> t
-    Unary  (Operator s r t) (p,x)       -> t <> ifPrns R s r p x
+    Lit t                               ->                     t
+    Prefix  (Operator s r t) (p,x)      ->                     t <> ifPrns R s r p x
+    Postfix (Operator s r t) (p,x)      -> ifPrns L s r p x <> t
     Binary (Operator s r t) (p,x) (q,y) -> ifPrns L s r p x <> t <> ifPrns R s r q y
   ifPrns sid oa op (Just (ia,ip))
     | ip < op || ip == op && (ia /= oa || oa /= sid) = prns
   ifPrns _ _ _ _ = id
   prec = \case
     Lit _                       -> Nothing
-    Unary  (Operator s r _) _   -> Just (s,r)
-    Binary (Operator s r _) _ _ -> Just (s,r)
+    Prefix  (Operator s r _) _   -> Just (s,r)
+    Postfix (Operator s r _) _   -> Just (s,r)
+    Binary  (Operator s r _) _ _ -> Just (s,r)
 {-# INLINABLE showExpr #-}
